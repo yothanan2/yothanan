@@ -45,12 +45,14 @@
         const registerBtn = document.getElementById('register-btn');
 
         // Switch between login and register forms
-        showRegister.addEventListener('click', () => {
+        showRegister.addEventListener('click', (event) => {
+            event.preventDefault();
             loginBox.style.display = 'none';
             registerBox.style.display = 'block';
         });
 
-        showLogin.addEventListener('click', () => {
+        showLogin.addEventListener('click', (event) => {
+            event.preventDefault();
             registerBox.style.display = 'none';
             loginBox.style.display = 'block';
         });
