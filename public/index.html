@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login - Un Mercato</title>
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="/css/style.css">
 </head>
 <body>
     <div class="auth-container">
@@ -30,11 +30,13 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
         import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
-        import { firebaseConfig } from "./firebase-config.js";
+        import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
+        import { firebaseConfig } from "/js/firebase-config.js";
 
         // Initialize Firebase
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
+        const db = getFirestore(app);
 
         // Get references to the HTML elements
         const loginBox = document.getElementById('login-box');
@@ -83,13 +85,34 @@
                 });
         });
 
-        // Handle auth state changes
-        onAuthStateChanged(auth, (user) => {
+        // Handle auth state changes and role-based redirect
+        onAuthStateChanged(auth, async (user) => {
             if (user) {
-                // User is signed in, redirect to the main page
-                document.body.innerHTML = '<h1>Welcome! Redirecting...</h1>';
-                // In a real application, you would redirect to the main page:
-                window.location.href = 'products.html';
+                // User is signed in, check their role
+                document.body.innerHTML = '<h1>Welcome! Checking your role and redirecting...</h1>';
+
+                const userDocRef = doc(db, "users", user.uid);
+                try {
+                    const userDoc = await getDoc(userDocRef);
+                    if (userDoc.exists()) {
+                        const userData = userDoc.data();
+                        if (userData.role === 'admin') {
+                            // Redirect to admin dashboard
+                            window.location.href = '/admin/';
+                        } else {
+                            // Redirect to user products page
+                            window.location.href = '/user/products.html';
+                        }
+                    } else {
+                        // If user document doesn't exist, default to products page
+                        console.error("User document not found in Firestore.");
+                        window.location.href = '/user/products.html';
+                    }
+                } catch (error) {
+                    console.error("Error getting user document:", error);
+                    // If there's an error, default to products page
+                    window.location.href = '/user/products.html';
+                }
             }
         });
     </script>

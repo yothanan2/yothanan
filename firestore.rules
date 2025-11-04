@@ -6,9 +6,9 @@ service cloud.firestore {
       allow read, write: if false;
     }
 
-    // Allow users to be created and for authenticated users to read user data
+    // Allow users to be created and for authenticated users to read their own user data
     match /users/{userId} {
-      allow read: if request.auth != null;
+      allow read: if request.auth.uid == userId;
       allow create: if request.auth.uid == userId;
     }
   }

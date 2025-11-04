@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Products - Un Mercato</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <header>
+        <h1>Un Mercato</h1>
+        <div>
+            <a href="/user/landing.html" class="nav-link">Landing Page</a>
+            <button id="logout-btn">Log Out</button>
+        </div>
+    </header>
+
+    <main class="product-container" id="product-container">
+        <!-- Products will be dynamically inserted here -->
+    </main>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
+        import { getAuth, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
+        import { firebaseConfig } from "/js/firebase-config.js";
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+
+        // Handle logout
+        const logoutBtn = document.getElementById('logout-btn');
+        logoutBtn.addEventListener('click', () => {
+            signOut(auth);
+        });
+
+        // Handle auth state changes
+        onAuthStateChanged(auth, (user) => {
+            if (!user) {
+                // User is signed out, redirect to the login page
+                window.location.href = '/';
+            } else {
+                // User is signed in, render the products
+                renderProducts();
+            }
+        });
+
+        // --- Product Data and Rendering ---
+
+        // Placeholder product data
+        const products = [
+            {
+                name: 'Classic Leather Tote',
+                price: '150.00',
+                image: 'https://via.placeholder.com/300x300.png?text=Leather+Tote'
+            },
+            {
+                name: 'Silk Scarf',
+                price: '45.00',
+                image: 'https://via.placeholder.com/300x300.png?text=Silk+Scarf'
+            },
+            {
+                name: 'Wool Fedora',
+                price: '75.00',
+                image: 'https://via.placeholder.com/300x300.png?text=Wool+Fedora'
+            },
+            {
+                name: 'Silver Bangle',
+                price: '95.00',
+                image: 'https://via.placeholder.com/300x300.png?text=Silver+Bangle'
+            }
+        ];
+
+        // Function to render products
+        function renderProducts() {
+            const productContainer = document.getElementById('product-container');
+            let productHTML = '';
+            products.forEach(product => {
+                productHTML += `
+                    <div class="product-card">
+                        <img src="${product.image}" alt="${product.name}">
+                        <h3>${product.name}</h3>
+                        <p>$${product.price}</p>
+                        <button>Add to Cart</button>
+                    </div>
+                `;
+            });
+            productContainer.innerHTML = productHTML;
+        }
+    </script>
+</body>
+</html>
