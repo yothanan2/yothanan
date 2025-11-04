@@ -6,11 +6,6 @@ service cloud.firestore {
       allow read, write: if false;
     }
 
-    // Allow authenticated users to manage their own tasks
-    match /tasks/{taskId} {
-      allow read, create, update, delete: if request.auth != null && request.auth.uid == resource.data.userId;
-    }
-
     // Allow users to be created and for authenticated users to read user data
     match /users/{userId} {
       allow read: if request.auth != null;

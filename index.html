@@ -1,149 +1,91 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>Kitchen Management</title>
-  <link rel="stylesheet" type="text/css" href="style.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Un Mercato</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <h1>Kitchen Management</h1>
+    <div class="auth-container">
+        <div class="auth-box" id="login-box">
+            <h2>Login</h2>
+            <p>Enter your email and password to login.</p>
+            <input type="email" id="login-email" placeholder="Email" required>
+            <input type="password" id="login-password" placeholder="Password" required>
+            <button id="login-btn">Sign In</button>
+            <p class="auth-switch">Don't have an account? <a href="#" id="show-register">Register</a></p>
+        </div>
 
-  <div id="auth-container">
-    <input type="email" id="email-input" placeholder="Email">
-    <input type="password" id="password-input" placeholder="Password">
-    <button id="signup-btn">Sign Up</button>
-    <button id="login-btn">Log In</button>
-  </div>
+        <div class="auth-box" id="register-box" style="display: none;">
+            <h2>Register</h2>
+            <p>Create an account to get started.</p>
+            <input type="email" id="register-email" placeholder="Email" required>
+            <input type="password" id="register-password" placeholder="Password" required>
+            <button id="register-btn">Register</button>
+            <p class="auth-switch">Already have an account? <a href="#" id="show-login">Login</a></p>
+        </div>
+    </div>
 
-  <div id="user-container" style="display: none;">
-    <p>Welcome, <span id="user-email"></span>!</p>
-    <button id="logout-btn">Log Out</button>
-  </div>
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
+        import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
+        import { firebaseConfig } from "./firebase-config.js";
 
-  <div id="mise-en-place" style="display: none;">
-    <h2>Mise en Place (To-Do List)</h2>
-    <input type="text" id="new-task-input" placeholder="Add a new task">
-    <button id="add-task-btn">Add</button>
-    <ul id="task-list"></ul>
-  </div>
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
 
-  <!-- NOTE: You will need to create a firebase-config.js file with your own credentials. -->
-  <!-- See firebase-config.js.template for an example. -->
-  <script type="module">
-    // Import the functions you need from the SDKs you need
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
-    import { getFirestore, collection, addDoc, serverTimestamp, onSnapshot, query, orderBy, doc, deleteDoc, setDoc, where } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
-    import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
-    import { firebaseConfig } from "./firebase-config.js";
+        // Get references to the HTML elements
+        const loginBox = document.getElementById('login-box');
+        const registerBox = document.getElementById('register-box');
+        const showRegister = document.getElementById('show-register');
+        const showLogin = document.getElementById('show-login');
+        const loginBtn = document.getElementById('login-btn');
+        const registerBtn = document.getElementById('register-btn');
 
-    // Initialize Firebase
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
-    const auth = getAuth(app);
-
-    // Get references to the HTML elements
-    const authContainer = document.getElementById('auth-container');
-    const userContainer = document.getElementById('user-container');
-    const miseEnPlaceContainer = document.getElementById('mise-en-place');
-    const emailInput = document.getElementById('email-input');
-    const passwordInput = document.getElementById('password-input');
-    const signupBtn = document.getElementById('signup-btn');
-    const loginBtn = document.getElementById('login-btn');
-    const logoutBtn = document.getElementById('logout-btn');
-    const userEmail = document.getElementById('user-email');
-    const newTaskInput = document.getElementById('new-task-input');
-    const addTaskBtn = document.getElementById('add-task-btn');
-    const taskList = document.getElementById('task-list');
-
-    // Add a new task to Firestore
-    const addTask = () => {
-      const taskText = newTaskInput.value.trim();
-      const user = auth.currentUser;
-      if (taskText !== '' && user) {
-        addDoc(collection(db, 'tasks'), {
-          text: taskText,
-          createdAt: serverTimestamp(),
-          userId: user.uid
-        })
-        .then(() => {
-          newTaskInput.value = '';
-        })
-        .catch((error) => {
-          console.error('Error adding task: ', error);
-        });
-      }
-    };
-
-    addTaskBtn.addEventListener('click', addTask);
-
-    // Delete a task from Firestore
-    const deleteTask = (event) => {
-      if (event.target.classList.contains('delete-btn')) {
-        const id = event.target.getAttribute('data-id');
-        deleteDoc(doc(db, 'tasks', id));
-      }
-    };
-
-    taskList.addEventListener('click', deleteTask);
-
-    // Auth state listener
-    onAuthStateChanged(auth, (user) => {
-      if (user) {
-        // User is signed in
-        authContainer.style.display = 'none';
-        userContainer.style.display = 'block';
-        miseEnPlaceContainer.style.display = 'block';
-        userEmail.textContent = user.email;
-
-        // Listen for real-time updates from Firestore
-        const q = query(collection(db, 'tasks'), where("userId", "==", user.uid), orderBy('createdAt'));
-        onSnapshot(q, (snapshot) => {
-          taskList.innerHTML = '';
-          snapshot.forEach((doc) => {
-            const task = doc.data();
-            const li = document.createElement('li');
-            li.innerHTML = `
-              <span>${task.text}</span>
-              <button class="delete-btn" data-id="${doc.id}">Delete</button>
-            `;
-            taskList.appendChild(li);
-          });
+        // Switch between login and register forms
+        showRegister.addEventListener('click', () => {
+            loginBox.style.display = 'none';
+            registerBox.style.display = 'block';
         });
 
-      } else {
-        // User is signed out
-        authContainer.style.display = 'block';
-        userContainer.style.display = 'none';
-        miseEnPlaceContainer.style.display = 'none';
-      }
-    });
-
-    // Sign up a new user
-    signupBtn.addEventListener('click', () => {
-      const email = emailInput.value;
-      const password = passwordInput.value;
-      createUserWithEmailAndPassword(auth, email, password)
-        .then((userCredential) => {
-          // The Cloud Function will handle creating the user document.
-        })
-        .catch((error) => {
-          console.error('Error signing up: ', error);
+        showLogin.addEventListener('click', () => {
+            registerBox.style.display = 'none';
+            loginBox.style.display = 'block';
         });
-    });
 
-    // Log in an existing user
-    loginBtn.addEventListener('click', () => {
-      const email = emailInput.value;
-      const password = passwordInput.value;
-      signInWithEmailAndPassword(auth, email, password)
-        .catch((error) => {
-          console.error('Error logging in: ', error);
+        // Handle login
+        loginBtn.addEventListener('click', () => {
+            const email = document.getElementById('login-email').value;
+            const password = document.getElementById('login-password').value;
+            signInWithEmailAndPassword(auth, email, password)
+                .catch((error) => {
+                    console.error('Error logging in: ', error);
+                    alert('Error logging in: ' + error.message);
+                });
         });
-    });
 
-    // Log out the current user
-    logoutBtn.addEventListener('click', () => {
-      signOut(auth);
-    });
-  </script>
+        // Handle registration
+        registerBtn.addEventListener('click', () => {
+            const email = document.getElementById('register-email').value;
+            const password = document.getElementById('register-password').value;
+            createUserWithEmailAndPassword(auth, email, password)
+                .catch((error) => {
+                    console.error('Error signing up: ', error);
+                    alert('Error signing up: ' + error.message);
+                });
+        });
+
+        // Handle auth state changes
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                // User is signed in, redirect to the main page
+                document.body.innerHTML = '<h1>Welcome! Redirecting...</h1>';
+                // In a real application, you would redirect to the main page:
+                window.location.href = 'products.html';
+            }
+        });
+    </script>
 </body>
 </html>
