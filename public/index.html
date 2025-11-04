@@ -14,6 +14,10 @@
             <input type="email" id="login-email" placeholder="Email" required>
             <input type="password" id="login-password" placeholder="Password" required>
             <button id="login-btn">Sign In</button>
+            <div class="quick-login-container">
+                <button id="quick-login-admin-btn" class="quick-login-btn">Quick Login as Admin</button>
+                <button id="quick-login-user-btn" class="quick-login-btn">Quick Login as User</button>
+            </div>
             <p class="auth-switch">Don't have an account? <a href="#" id="show-register">Register</a></p>
         </div>
 
@@ -45,6 +49,8 @@
         const showLogin = document.getElementById('show-login');
         const loginBtn = document.getElementById('login-btn');
         const registerBtn = document.getElementById('register-btn');
+        const quickLoginAdminBtn = document.getElementById('quick-login-admin-btn');
+        const quickLoginUserBtn = document.getElementById('quick-login-user-btn');
 
         // Switch between login and register forms
         showRegister.addEventListener('click', (event) => {
@@ -67,6 +73,23 @@
                 .catch((error) => {
                     console.error('Error logging in: ', error);
                     alert('Error logging in: ' + error.message);
+                });
+        });
+
+        // Handle quick login
+        quickLoginAdminBtn.addEventListener('click', () => {
+            signInWithEmailAndPassword(auth, 'yothanan@gmail.com', 'qqhu64vh')
+                .catch((error) => {
+                    console.error('Error logging in as admin: ', error);
+                    alert('Error logging in as admin: ' + error.message);
+                });
+        });
+
+        quickLoginUserBtn.addEventListener('click', () => {
+            signInWithEmailAndPassword(auth, 'user', '123456')
+                .catch((error) => {
+                    console.error('Error logging in as user: ', error);
+                    alert('Error logging in as user: ' + error.message);
                 });
         });
 
