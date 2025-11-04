@@ -1,2 +1,4 @@
 # Ignore Firebase configuration file
 firebase-config.js
+.firebase/
+.firebaserc
