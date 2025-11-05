@@ -75,15 +75,6 @@
             const email = document.getElementById('register-email').value;
             const password = document.getElementById('register-password').value;
             createUserWithEmailAndPassword(auth, email, password)
-                .then((userCredential) => {
-                    // User created, now create their document in Firestore
-                    const user = userCredential.user;
-                    const userDocRef = doc(db, "users", user.uid);
-                    return setDoc(userDocRef, {
-                        role: 'user',
-                        email: email // Optional: store the email as well
-                    });
-                })
                 .catch((error) => {
                     console.error('Error signing up: ', error);
                     if (error.code === 'auth/email-already-in-use') {
