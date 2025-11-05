@@ -3,10 +3,69 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin - Coming Soon</title>
+    <title>User Management - Admin</title>
     <link rel="stylesheet" href="/css/style.css">
 </head>
 <body>
-    <h1>Admin - Coming soon</h1>
+    <header>
+        <h1>Admin - User Management</h1>
+        <button id="logout-btn">Log Out</button>
+    </header>
+
+    <main>
+        <h2>All Users</h2>
+        <table id="users-table">
+            <thead>
+                <tr>
+                    <th>Email</th>
+                    <th>Role</th>
+                </tr>
+            </thead>
+            <tbody id="users-table-body">
+                <!-- User data will be inserted here -->
+            </tbody>
+        </table>
+    </main>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
+        import { getAuth, signOut } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
+        import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
+        import { firebaseConfig } from "/js/firebase-config.js";
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        // Handle logout
+        const logoutBtn = document.getElementById('logout-btn');
+        logoutBtn.addEventListener('click', () => {
+            signOut(auth).then(() => {
+                window.location.href = '/';
+            });
+        });
+
+        // Fetch and display users
+        async function fetchUsers() {
+            const usersTableBody = document.getElementById('users-table-body');
+            try {
+                const querySnapshot = await getDocs(collection(db, "users"));
+                querySnapshot.forEach((doc) => {
+                    const user = doc.data();
+                    const row = `<tr>
+                        <td>${user.email}</td>
+                        <td>${user.role}</td>
+                    </tr>`;
+                    usersTableBody.innerHTML += row;
+                });
+            } catch (error) {
+                console.error("Error fetching users: ", error);
+                alert("You don't have permission to view users.");
+            }
+        }
+
+        fetchUsers();
+    </script>
 </body>
 </html>

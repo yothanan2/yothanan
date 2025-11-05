@@ -6,9 +6,11 @@ service cloud.firestore {
       allow read, write: if false;
     }
 
-    // Allow users to be created and for authenticated users to read their own user data
+    // Allow users to create their own document,
+    // and allow authenticated users to read their own data.
+    // Admins are allowed to read all user data.
     match /users/{userId} {
-      allow read: if request.auth.uid == userId;
+      allow read: if request.auth.uid == userId || get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
       allow create: if request.auth.uid == userId;
     }
   }
